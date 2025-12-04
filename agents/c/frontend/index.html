@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analyzer Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #ee0979;
+        }
+        .analyze-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(238, 9, 121, 0.3);
+        }
+        .results {
+            display: none;
+        }
+        .results.show {
+            display: block;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ee0979;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .sentiment {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .sentiment.positive { background: #e8f5e9; }
+        .sentiment.negative { background: #ffebee; }
+        .sentiment.neutral { background: #fff3e0; }
+        .sentiment-score {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        .sentiment.positive .sentiment-score { color: #2e7d32; }
+        .sentiment.negative .sentiment-score { color: #c62828; }
+        .sentiment.neutral .sentiment-score { color: #ef6c00; }
+        .top-words {
+            margin-top: 20px;
+        }
+        .top-words h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .word-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .word-label {
+            width: 100px;
+            font-weight: bold;
+            color: #333;
+        }
+        .word-bar-fill {
+            height: 25px;
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.85em;
+            transition: width 0.5s ease;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>📊 Text Analyzer Agent</h1>
+            <textarea id="textInput" placeholder="Paste or type your text here to analyze..."></textarea>
+            <button class="analyze-btn" onclick="analyzeText()">Analyze Text</button>
+        </div>
+
+        <div class="results card" id="results">
+            <h2 style="margin-bottom: 20px; color: #333;">Analysis Results</h2>
+            
+            <div class="sentiment" id="sentiment">
+                <div class="sentiment-score" id="sentimentScore">0</div>
+                <div id="sentimentLabel">Neutral</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="wordCount">0</div>
+                    <div class="stat-label">Words</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="charCount">0</div>
+                    <div class="stat-label">Characters</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="sentenceCount">0</div>
+                    <div class="stat-label">Sentences</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="paragraphCount">0</div>
+                    <div class="stat-label">Paragraphs</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="avgWordLen">0</div>
+                    <div class="stat-label">Avg Word Length</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="readingTime">0</div>
+                    <div class="stat-label">Min Read Time</div>
+                </div>
+            </div>
+
+            <div class="top-words">
+                <h3>Top Words</h3>
+                <div id="topWordsList"></div>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">← Back to Gateway</a>
+    </div>
+
+    <script>
+        async function analyzeText() {
+            const text = document.getElementById('textInput').value;
+            if (!text.trim()) {
+                alert('Please enter some text to analyze');
+                return;
+            }
+
+            try {
+                const response = await fetch('/c/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Error analyzing text');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.add('show');
+
+            // Update stats
+            document.getElementById('wordCount').textContent = data.word_count;
+            document.getElementById('charCount').textContent = data.character_count;
+            document.getElementById('sentenceCount').textContent = data.sentence_count;
+            document.getElementById('paragraphCount').textContent = data.paragraph_count;
+            document.getElementById('avgWordLen').textContent = data.average_word_length;
+            document.getElementById('readingTime').textContent = data.reading_time_minutes;
+
+            // Update sentiment
+            const sentimentEl = document.getElementById('sentiment');
+            sentimentEl.className = 'sentiment ' + data.sentiment_label.toLowerCase();
+            document.getElementById('sentimentScore').textContent = data.sentiment_score;
+            document.getElementById('sentimentLabel').textContent = data.sentiment_label;
+
+            // Update top words
+            const topWordsEl = document.getElementById('topWordsList');
+            const maxCount = data.top_words.length > 0 ? data.top_words[0].count : 1;
+            
+            topWordsEl.innerHTML = data.top_words.map(item => {
+                const width = (item.count / maxCount) * 100;
+                return `
+                    <div class="word-bar">
+                        <span class="word-label">${item.word}</span>
+                        <div class="word-bar-fill" style="width: ${width}%">${item.count}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

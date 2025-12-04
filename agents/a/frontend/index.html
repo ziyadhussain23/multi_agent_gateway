@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .display {
+            background: #1a1a2e;
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 2em;
+            text-align: right;
+            margin-bottom: 20px;
+            min-height: 70px;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+        }
+        .expression {
+            font-size: 0.5em;
+            color: #888;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="number"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        button {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        .btn-add { background: #4CAF50; color: white; }
+        .btn-subtract { background: #f44336; color: white; }
+        .btn-multiply { background: #2196F3; color: white; }
+        .btn-divide { background: #FF9800; color: white; }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>🔢 Calculator Agent</h1>
+        <div class="display">
+            <span class="expression" id="expression"></span>
+            <span id="result">0</span>
+        </div>
+        <div class="input-group">
+            <input type="number" id="numA" placeholder="Number A" value="10">
+            <input type="number" id="numB" placeholder="Number B" value="5">
+        </div>
+        <div class="buttons">
+            <button class="btn-add" onclick="calculate('add')">+ Add</button>
+            <button class="btn-subtract" onclick="calculate('subtract')">− Subtract</button>
+            <button class="btn-multiply" onclick="calculate('multiply')">× Multiply</button>
+            <button class="btn-divide" onclick="calculate('divide')">÷ Divide</button>
+        </div>
+        <a href="/" class="back-link">← Back to Gateway</a>
+    </div>
+
+    <script>
+        async function calculate(operation) {
+            const a = parseFloat(document.getElementById('numA').value) || 0;
+            const b = parseFloat(document.getElementById('numB').value) || 0;
+            
+            try {
+                const response = await fetch('/a/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ a, b, operation })
+                });
+                const data = await response.json();
+                
+                document.getElementById('expression').textContent = data.expression;
+                document.getElementById('result').textContent = 
+                    typeof data.result === 'number' ? 
+                    (Number.isInteger(data.result) ? data.result : data.result.toFixed(4)) : 
+                    data.result;
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error';
+                console.error('Calculation error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

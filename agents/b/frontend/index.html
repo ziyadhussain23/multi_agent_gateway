@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .add-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .add-form input {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+        }
+        .add-form input:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+        .add-form select {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .add-form button {
+            padding: 15px 30px;
+            background: #11998e;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .add-form button:hover {
+            background: #0d7d6e;
+        }
+        .todo-list {
+            background: white;
+            border-radius: 0 0 20px 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            gap: 15px;
+            transition: background 0.3s;
+        }
+        .todo-item:hover {
+            background: #f9f9f9;
+        }
+        .todo-item.completed .todo-title {
+            text-decoration: line-through;
+            color: #999;
+        }
+        .todo-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #11998e;
+        }
+        .todo-content {
+            flex: 1;
+        }
+        .todo-title {
+            font-size: 1.1em;
+            color: #333;
+        }
+        .todo-meta {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .priority {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .priority.high { background: #ffebee; color: #c62828; }
+        .priority.medium { background: #fff3e0; color: #ef6c00; }
+        .priority.low { background: #e8f5e9; color: #2e7d32; }
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Todo Agent</h1>
+            <form class="add-form" onsubmit="addTodo(event)">
+                <input type="text" id="todoTitle" placeholder="What needs to be done?" required>
+                <select id="todoPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+                <button type="submit">Add Todo</button>
+            </form>
+            <div class="stats">
+                <span id="totalCount">Total: 0</span>
+                <span id="completedCount">Completed: 0</span>
+            </div>
+        </div>
+        <div class="todo-list" id="todoList">
+            <div class="empty-state">No todos yet. Add one above!</div>
+        </div>
+        <a href="/" class="back-link">← Back to Gateway</a>
+    </div>
+
+    <script>
+        const API_BASE = '/b/api';
+
+        async function loadTodos() {
+            try {
+                const response = await fetch(`${API_BASE}/todos`);
+                const todos = await response.json();
+                renderTodos(todos);
+            } catch (error) {
+                console.error('Error loading todos:', error);
+            }
+        }
+
+        function renderTodos(todos) {
+            const list = document.getElementById('todoList');
+            const completed = todos.filter(t => t.completed).length;
+            
+            document.getElementById('totalCount').textContent = `Total: ${todos.length}`;
+            document.getElementById('completedCount').textContent = `Completed: ${completed}`;
+
+            if (todos.length === 0) {
+                list.innerHTML = '<div class="empty-state">No todos yet. Add one above!</div>';
+                return;
+            }
+
+            list.innerHTML = todos.map(todo => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" class="todo-checkbox" 
+                           ${todo.completed ? 'checked' : ''} 
+                           onchange="toggleTodo('${todo.id}')">
+                    <div class="todo-content">
+                        <div class="todo-title">${escapeHtml(todo.title)}</div>
+                        <div class="todo-meta">
+                            <span class="priority ${todo.priority}">${todo.priority}</span>
+                            · Created: ${new Date(todo.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTodo('${todo.id}')">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        async function addTodo(event) {
+            event.preventDefault();
+            const title = document.getElementById('todoTitle').value;
+            const priority = document.getElementById('todoPriority').value;
+
+            try {
+                await fetch(`${API_BASE}/todos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, priority })
+                });
+                document.getElementById('todoTitle').value = '';
+                loadTodos();
+            } catch (error) {
+                console.error('Error adding todo:', error);
+            }
+        }
+
+        async function toggleTodo(id) {
+            try {
+                await fetch(`${API_BASE}/todos/${id}/toggle`, { method: 'POST' });
+                loadTodos();
+            } catch (error) {
+                console.error('Error toggling todo:', error);
+            }
+        }
+
+        async function deleteTodo(id) {
+            try {
+                await fetch(`${API_BASE}/todos/${id}`, { method: 'DELETE' });
+                loadTodos();
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load todos on page load
+        loadTodos();
+    </script>
+</body>
+</html>
