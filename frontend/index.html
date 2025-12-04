@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Gateway</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Multi-Agent Gateway</h1>
+            <p class="subtitle">Select an agent to get started</p>
+        </header>
+        
+        <div class="agents-grid" id="agents-grid">
+            <!-- Agents will be loaded here -->
+        </div>
+        
+        <div class="status-bar">
+            <span class="status-indicator" id="status-indicator"></span>
+            <span id="status-text">Checking connection...</span>
+        </div>
+        
+        <footer>
+            <p>
+                Gateway API Docs: <a href="/docs">/docs</a> | 
+                OpenAPI Schema: <a href="/openapi.json">/openapi.json</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
