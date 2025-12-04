@@ -1,7 +1,3 @@
-"""
-Agent A: Calculator Service
-A simple calculator API with basic arithmetic operations
-"""
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -15,10 +11,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Mount static files
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "frontend")), name="static")
 
 
@@ -36,19 +30,16 @@ class CalculationResponse(BaseModel):
 
 @app.get("/")
 async def serve_frontend():
-    """Serve the calculator frontend"""
     return FileResponse(os.path.join(BASE_DIR, "frontend", "index.html"))
 
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {"status": "healthy", "agent": "calculator"}
 
 
 @app.post("/calculate", response_model=CalculationResponse)
 async def calculate(request: CalculationRequest):
-    """Perform calculation based on the operation"""
     a, b, op = request.a, request.b, request.operation.lower()
     
     operations = {

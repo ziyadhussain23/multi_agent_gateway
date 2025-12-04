@@ -36,12 +36,8 @@ multi_agent_gateway/
 
 ```bash
 cd multi_agent_gateway
-
-# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -66,13 +62,10 @@ pip install -r requirements.txt
 Each agent can run independently on its own port:
 
 ```bash
-# Calculator on port 8001
 cd agents/a && ./run.sh
 
-# Todo List on port 8002
 cd agents/b && ./run.sh
 
-# Text Analyzer on port 8003
 cd agents/c && ./run.sh
 ```
 
@@ -97,6 +90,3 @@ Uses **FastAPI sub-application mounting**:
 - Path-based routing: `/a/`, `/b/`, `/c/`
 - Each agent has its own API docs
 
-## 📜 License
-
-MIT

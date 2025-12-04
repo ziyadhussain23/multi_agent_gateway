@@ -1,7 +1,3 @@
-"""
-Agent C: Text Analyzer Service
-A text analysis API with word count, sentiment, and statistics
-"""
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -17,10 +13,8 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Mount static files
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "frontend")), name="static")
 
 
@@ -49,18 +43,15 @@ class TextAnalysis(BaseModel):
 
 @app.get("/")
 async def serve_frontend():
-    """Serve the text analyzer frontend"""
     return FileResponse(os.path.join(BASE_DIR, "frontend", "index.html"))
 
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {"status": "healthy", "agent": "text-analyzer"}
 
 
 def simple_sentiment(text: str) -> tuple:
-    """Simple sentiment analysis based on keyword matching"""
     positive_words = {
         'good', 'great', 'awesome', 'excellent', 'amazing', 'wonderful', 
         'fantastic', 'love', 'happy', 'joy', 'beautiful', 'perfect',
@@ -94,10 +85,7 @@ def simple_sentiment(text: str) -> tuple:
 
 @app.post("/api/analyze", response_model=TextAnalysis)
 async def analyze_text(input: TextInput):
-    """Analyze the provided text"""
     text = input.text
-    
-    # Character counts
     char_count = len(text)
     char_count_no_spaces = len(text.replace(" ", "").replace("\n", "").replace("\t", ""))
     
@@ -152,14 +140,12 @@ async def analyze_text(input: TextInput):
 
 @app.post("/api/word-count")
 async def word_count(input: TextInput):
-    """Get simple word count"""
     words = re.findall(r'\b\w+\b', input.text)
     return {"word_count": len(words)}
 
 
 @app.post("/api/character-count")
 async def character_count(input: TextInput):
-    """Get character count"""
     return {
         "with_spaces": len(input.text),
         "without_spaces": len(input.text.replace(" ", ""))

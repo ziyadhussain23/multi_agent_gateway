@@ -1,7 +1,3 @@
-"""
-Agent B: Todo List Service
-A simple todo list API with CRUD operations
-"""
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -17,13 +13,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Get the directory where this script is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Mount static files
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "frontend")), name="static")
 
-# In-memory todo storage
 todos = {}
 
 
@@ -51,25 +44,21 @@ class Todo(BaseModel):
 
 @app.get("/")
 async def serve_frontend():
-    """Serve the todo frontend"""
     return FileResponse(os.path.join(BASE_DIR, "frontend", "index.html"))
 
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {"status": "healthy", "agent": "todo", "total_todos": len(todos)}
 
 
 @app.get("/api/todos", response_model=List[Todo])
 async def get_todos():
-    """Get all todos"""
     return list(todos.values())
 
 
 @app.post("/api/todos", response_model=Todo)
 async def create_todo(todo: TodoCreate):
-    """Create a new todo"""
     todo_id = str(uuid.uuid4())[:8]
     new_todo = Todo(
         id=todo_id,
@@ -85,7 +74,6 @@ async def create_todo(todo: TodoCreate):
 
 @app.get("/api/todos/{todo_id}", response_model=Todo)
 async def get_todo(todo_id: str):
-    """Get a specific todo"""
     if todo_id not in todos:
         raise HTTPException(status_code=404, detail="Todo not found")
     return todos[todo_id]
@@ -93,7 +81,6 @@ async def get_todo(todo_id: str):
 
 @app.put("/api/todos/{todo_id}", response_model=Todo)
 async def update_todo(todo_id: str, update: TodoUpdate):
-    """Update a todo"""
     if todo_id not in todos:
         raise HTTPException(status_code=404, detail="Todo not found")
     
@@ -113,7 +100,6 @@ async def update_todo(todo_id: str, update: TodoUpdate):
 
 @app.delete("/api/todos/{todo_id}")
 async def delete_todo(todo_id: str):
-    """Delete a todo"""
     if todo_id not in todos:
         raise HTTPException(status_code=404, detail="Todo not found")
     del todos[todo_id]
@@ -122,7 +108,6 @@ async def delete_todo(todo_id: str):
 
 @app.post("/api/todos/{todo_id}/toggle")
 async def toggle_todo(todo_id: str):
-    """Toggle todo completion status"""
     if todo_id not in todos:
         raise HTTPException(status_code=404, detail="Todo not found")
     todos[todo_id].completed = not todos[todo_id].completed

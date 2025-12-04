@@ -1,36 +1,30 @@
-"""
-Multi-Agent Gateway
-A unified FastAPI gateway that routes requests to multiple agents
-"""
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
 import os
 
-# Import agent applications
 from agents.a.main import app as calculator_app
 from agents.b.main import app as todo_app
 from agents.c.main import app as text_analyzer_app
 
-# Agent registry for the homepage
 AGENTS = {
     "a": {
         "name": "Calculator",
         "description": "Perform basic arithmetic operations",
-        "icon": "🔢",
+        "icon": "#",
         "color": "#667eea"
     },
     "b": {
         "name": "Todo List",
         "description": "Manage your tasks and todos",
-        "icon": "📝",
+        "icon": "T",
         "color": "#11998e"
     },
     "c": {
         "name": "Text Analyzer",
         "description": "Analyze text for statistics and sentiment",
-        "icon": "📊",
+        "icon": "A",
         "color": "#ee0979"
     }
 }
@@ -38,11 +32,10 @@ AGENTS = {
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan handler"""
-    print("🚀 Multi-Agent Gateway starting...")
-    print(f"📡 Available agents: {', '.join(AGENTS.keys())}")
+    print("Multi-Agent Gateway starting...")
+    print(f"Available agents: {', '.join(AGENTS.keys())}")
     yield
-    print("👋 Multi-Agent Gateway shutting down...")
+    print("Multi-Agent Gateway shutting down...")
 
 
 app = FastAPI(
@@ -52,7 +45,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Mount each agent under its path prefix
 app.mount("/a", calculator_app)
 app.mount("/b", todo_app)
 app.mount("/c", text_analyzer_app)
@@ -60,8 +52,6 @@ app.mount("/c", text_analyzer_app)
 
 @app.get("/", response_class=HTMLResponse)
 async def homepage():
-    """Serve the gateway homepage with links to all agents"""
-    
     agent_cards = ""
     for agent_id, agent in AGENTS.items():
         agent_cards += f"""
@@ -222,7 +212,7 @@ async def homepage():
     <body>
         <div class="container">
             <header>
-                <h1>🤖 Multi-Agent Gateway</h1>
+                <h1>Multi-Agent Gateway</h1>
                 <p class="subtitle">Select an agent to get started</p>
             </header>
             
@@ -250,7 +240,6 @@ async def homepage():
 
 @app.get("/health")
 async def gateway_health():
-    """Gateway health check - checks all agents"""
     return {
         "status": "healthy",
         "gateway": "multi-agent-gateway",
@@ -261,7 +250,6 @@ async def gateway_health():
 
 @app.get("/api/agents")
 async def list_agents():
-    """List all available agents"""
     return {"agents": AGENTS}
 
 
